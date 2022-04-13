@@ -15,6 +15,8 @@ import torchvision
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 
+from dataset import ImageNet1000Train
+
 
 def get_network(args):
     """ return given network
@@ -162,8 +164,59 @@ def get_network(args):
 
     return net
 
+#
+# def get_training_dataloader(mean, std, batch_size=16, num_workers=2, shuffle=True):
+#     """ return training dataloader
+#     Args:
+#         mean: mean of cifar100 training dataset
+#         std: std of cifar100 training dataset
+#         path: path to cifar100 training python dataset
+#         batch_size: dataloader batchsize
+#         num_workers: dataloader num_works
+#         shuffle: whether to shuffle
+#     Returns: train_data_loader:torch dataloader object
+#     """
+#
+#     transform_train = transforms.Compose([
+#         #transforms.ToPILImage(),
+#         transforms.RandomCrop(32, padding=4),
+#         transforms.RandomHorizontalFlip(),
+#         transforms.RandomRotation(15),
+#         transforms.ToTensor(),
+#         transforms.Normalize(mean, std)
+#     ])
+#     #cifar100_training = CIFAR100Train(path, transform=transform_train)
+#     cifar100_training = torchvision.datasets.CIFAR100(root='./data', train=True, download=True, transform=transform_train)
+#     cifar100_training_loader = DataLoader(
+#         cifar100_training, shuffle=shuffle, num_workers=num_workers, batch_size=batch_size)
+#
+#     return cifar100_training_loader
+#
+# def get_test_dataloader(mean, std, batch_size=16, num_workers=2, shuffle=True):
+#     """ return training dataloader
+#     Args:
+#         mean: mean of cifar100 test dataset
+#         std: std of cifar100 test dataset
+#         path: path to cifar100 test python dataset
+#         batch_size: dataloader batchsize
+#         num_workers: dataloader num_works
+#         shuffle: whether to shuffle
+#     Returns: cifar100_test_loader:torch dataloader object
+#     """
+#
+#     transform_test = transforms.Compose([
+#         transforms.ToTensor(),
+#         transforms.Normalize(mean, std)
+#     ])
+#     #cifar100_test = CIFAR100Test(path, transform=transform_test)
+#     cifar100_test = torchvision.datasets.CIFAR100(root='./data', train=False, download=True, transform=transform_test)
+#     cifar100_test_loader = DataLoader(
+#         cifar100_test, shuffle=shuffle, num_workers=num_workers, batch_size=batch_size)
+#
+#     return cifar100_test_loader
 
-def get_training_dataloader(mean, std, batch_size=16, num_workers=2, shuffle=True):
+
+def get_training_dataloader(path, mean, std, batch_size=16, num_workers=2, shuffle=True):
     """ return training dataloader
     Args:
         mean: mean of cifar100 training dataset
@@ -183,14 +236,14 @@ def get_training_dataloader(mean, std, batch_size=16, num_workers=2, shuffle=Tru
         transforms.ToTensor(),
         transforms.Normalize(mean, std)
     ])
-    #cifar100_training = CIFAR100Train(path, transform=transform_train)
-    cifar100_training = torchvision.datasets.CIFAR100(root='./data', train=True, download=True, transform=transform_train)
-    cifar100_training_loader = DataLoader(
-        cifar100_training, shuffle=shuffle, num_workers=num_workers, batch_size=batch_size)
+    ImageNet1000_training = ImageNet1000Train(path, transform=None)
+    # cifar100_training = torchvision.datasets.CIFAR100(root='./data', train=True, download=True, transform=transform_train)
+    ImageNet1000_training_loader = DataLoader(
+        ImageNet1000_training, shuffle=shuffle, num_workers=num_workers, batch_size=batch_size)
 
-    return cifar100_training_loader
+    return ImageNet1000_training_loader
 
-def get_test_dataloader(mean, std, batch_size=16, num_workers=2, shuffle=True):
+def get_test_dataloader(path, mean, std, batch_size=16, num_workers=2, shuffle=True):
     """ return training dataloader
     Args:
         mean: mean of cifar100 test dataset
@@ -207,11 +260,12 @@ def get_test_dataloader(mean, std, batch_size=16, num_workers=2, shuffle=True):
         transforms.Normalize(mean, std)
     ])
     #cifar100_test = CIFAR100Test(path, transform=transform_test)
-    cifar100_test = torchvision.datasets.CIFAR100(root='./data', train=False, download=True, transform=transform_test)
-    cifar100_test_loader = DataLoader(
-        cifar100_test, shuffle=shuffle, num_workers=num_workers, batch_size=batch_size)
+    ImageNet1000_test = ImageNet1000Train(path, transform=None)
+    # ImageNet1000_test = torchvision.datasets.CIFAR100(root='./data', train=False, download=True, transform=transform_test)
+    ImageNet1000_test_loader = DataLoader(
+        ImageNet1000_test, shuffle=shuffle, num_workers=num_workers, batch_size=batch_size)
 
-    return cifar100_test_loader
+    return ImageNet1000_test_loader
 
 def compute_mean_std(cifar100_dataset):
     """compute the mean and std of cifar100 dataset

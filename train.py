@@ -1,5 +1,5 @@
 # train.py
-#!/usr/bin/env	python3
+# !/usr/bin/env	python3
 
 """ train network using pytorch
 
@@ -26,8 +26,8 @@ from conf import settings
 from utils import get_network, get_training_dataloader, get_test_dataloader, WarmUpLR, \
     most_recent_folder, most_recent_weights, last_epoch, best_acc_weights
 
-def train(epoch):
 
+def train(epoch):
     start = time.time()
     net.train()
     for batch_index, (images, labels) in enumerate(cifar100_training_loader):
@@ -59,7 +59,7 @@ def train(epoch):
             total_samples=len(cifar100_training_loader.dataset)
         ))
 
-        #update training loss for each iteration
+        # update training loss for each iteration
         writer.add_scalar('Train/loss', loss.item(), n_iter)
 
         if epoch <= args.warm:
@@ -74,13 +74,13 @@ def train(epoch):
 
     print('epoch {} training time consumed: {:.2f}s'.format(epoch, finish - start))
 
+
 @torch.no_grad()
 def eval_training(epoch=0, tb=True):
-
     start = time.time()
     net.eval()
 
-    test_loss = 0.0 # cost function error
+    test_loss = 0.0  # cost function error
     correct = 0.0
 
     for (images, labels) in cifar100_test_loader:
@@ -109,16 +109,18 @@ def eval_training(epoch=0, tb=True):
     ))
     print()
 
-    #add informations to tensorboard
+    # add informations to tensorboard
     if tb:
         writer.add_scalar('Test/Average loss', test_loss / len(cifar100_test_loader.dataset), epoch)
         writer.add_scalar('Test/Accuracy', correct.float() / len(cifar100_test_loader.dataset), epoch)
 
     return correct.float() / len(cifar100_test_loader.dataset)
 
+
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
+    parser.add_argument('-datasets', type=str, required=True, help='path of datasets')
     parser.add_argument('-net', type=str, required=True, help='net type')
     parser.add_argument('-gpu', action='store_true', default=False, help='use gpu or not')
     parser.add_argument('-b', type=int, default=128, help='batch size for dataloader')
@@ -129,8 +131,9 @@ if __name__ == '__main__':
 
     net = get_network(args)
 
-    #data preprocessing:
+    # data preprocessing:
     cifar100_training_loader = get_training_dataloader(
+        args.datasets,
         settings.CIFAR100_TRAIN_MEAN,
         settings.CIFAR100_TRAIN_STD,
         num_workers=4,
@@ -139,6 +142,7 @@ if __name__ == '__main__':
     )
 
     cifar100_test_loader = get_test_dataloader(
+        args.datasets,
         settings.CIFAR100_TRAIN_MEAN,
         settings.CIFAR100_TRAIN_STD,
         num_workers=4,
@@ -148,7 +152,8 @@ if __name__ == '__main__':
 
     loss_function = nn.CrossEntropyLoss()
     optimizer = optim.SGD(net.parameters(), lr=args.lr, momentum=0.9, weight_decay=5e-4)
-    train_scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=settings.MILESTONES, gamma=0.2) #learning rate decay
+    train_scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=settings.MILESTONES,
+                                                     gamma=0.2)  # learning rate decay
     iter_per_epoch = len(cifar100_training_loader)
     warmup_scheduler = WarmUpLR(optimizer, iter_per_epoch * args.warm)
 
@@ -162,20 +167,20 @@ if __name__ == '__main__':
     else:
         checkpoint_path = os.path.join(settings.CHECKPOINT_PATH, args.net, settings.TIME_NOW)
 
-    #use tensorboard
+    # use tensorboard
     if not os.path.exists(settings.LOG_DIR):
         os.mkdir(settings.LOG_DIR)
 
-    #since tensorboard can't overwrite old values
-    #so the only way is to create a new tensorboard log
+    # since tensorboard can't overwrite old values
+    # so the only way is to create a new tensorboard log
     writer = SummaryWriter(log_dir=os.path.join(
-            settings.LOG_DIR, args.net, settings.TIME_NOW))
+        settings.LOG_DIR, args.net, settings.TIME_NOW))
     input_tensor = torch.Tensor(1, 3, 32, 32)
     if args.gpu:
         input_tensor = input_tensor.cuda()
     writer.add_graph(net, input_tensor)
 
-    #create checkpoint folder to save model
+    # create checkpoint folder to save model
     if not os.path.exists(checkpoint_path):
         os.makedirs(checkpoint_path)
     checkpoint_path = os.path.join(checkpoint_path, '{net}-{epoch}-{type}.pth')
@@ -200,7 +205,6 @@ if __name__ == '__main__':
 
         resume_epoch = last_epoch(os.path.join(settings.CHECKPOINT_PATH, args.net, recent_folder))
 
-
     for epoch in range(1, settings.EPOCH + 1):
         if epoch > args.warm:
             train_scheduler.step(epoch)
@@ -212,7 +216,7 @@ if __name__ == '__main__':
         train(epoch)
         acc = eval_training(epoch)
 
-        #start to save best performance model after learning rate decay to 0.01
+        # start to save best performance model after learning rate decay to 0.01
         if epoch > settings.MILESTONES[1] and best_acc < acc:
             weights_path = checkpoint_path.format(net=args.net, epoch=epoch, type='best')
             print('saving weights file to {}'.format(weights_path))
@@ -226,3 +230,7 @@ if __name__ == '__main__':
             torch.save(net.state_dict(), weights_path)
 
     writer.close()
+
+'''
+python train.py -net resnet50 -datasets /home/syh/train_data/cgd/c11  -warm  2 -gpu
+'''
