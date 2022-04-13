@@ -1,0 +1,14 @@
+
+onnx:
+  num_classes: 128
+  backbone_type: 'mobilenetv2'
+  gd_config: 'SM'
+  feature_dim: 512
+  mean_value: [123.675, 123.675, 123.675]
+  std_value: [58.395, 58.395, 58.395]
+  BGR2RGB: True
+
+
+rknn:
+  dataset: './cgd.txt'
+  do_quantization: True
