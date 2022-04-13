@@ -249,9 +249,9 @@ crashlytics.properties
 crashlytics-build.properties
 fabric.properties
 output
-output_rknn
 demo_images
 data
+runs
 checkpoint
 .idea
 .vscode
